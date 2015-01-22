@@ -2,7 +2,6 @@ var test = require('tape');
 
 var proto = require('../');
 var traverse = require('traverse');
-var EventEmitter = require('events').EventEmitter;
 
 test('protoFn', function (t) {
     t.plan(10);

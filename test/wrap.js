@@ -14,7 +14,7 @@ test('proto hashes', function (t) {
     }
     
     function swrapper (fn) {
-        // 1 of these
+        // 2 of these
         t.equal(typeof fn, 'function');
         times.s ++;
         if (--pending === 0) done();
@@ -22,7 +22,7 @@ test('proto hashes', function (t) {
     }
     
     function cwrapper (fn) {
-        // 2 of these
+        // 1 of these
         t.equal(typeof fn, 'function');
         times.c ++;
         if (--pending === 0) done();

@@ -1,8 +1,10 @@
 var EventEmitter = require('events').EventEmitter;
 var scrubber = require('./lib/scrub');
+var callbacks = require('./lib/callbacks')
 var objectKeys = require('./lib/keys');
 var forEach = require('./lib/foreach');
 var isEnumerable = require('./lib/is_enum');
+var shortId = require('shortid');
 
 module.exports = function (cons, opts) {
     return new Proto(cons, opts);
@@ -20,12 +22,18 @@ function Proto (cons, opts) {
     if (!opts) opts = {};
     
     self.remote = {};
-    self.callbacks = { remote : {} };
-    self.wrap = opts.wrap;
-    self.unwrap = opts.unwrap;
-    
-    self.scrubber = scrubber();
-    
+    self.callbacks = callbacks(opts);
+    self.scrubber = scrubber(callbacks({
+      timeout: opts.timeout
+    }));
+
+    self.callbacks.on('remove', function(id) {
+        self.emit('request', {
+            method : 'cull',
+            arguments : [ id ]
+        })
+    })
+
     if (typeof cons === 'function') {
         self.instance = new cons(self.remote, self);
     }
@@ -33,19 +41,11 @@ function Proto (cons, opts) {
 }
 
 Proto.prototype.start = function () {
-    this.request('methods', [ this.instance ]);
+    this.request('methods', [ this.instance ], true);
 };
 
-Proto.prototype.cull = function (id) {
-    delete this.callbacks.remote[id];
-    this.emit('request', {
-        method : 'cull',
-        arguments : [ id ]
-    });
-};
-
-Proto.prototype.request = function (method, args) {
-    var scrub = this.scrubber.scrub(args);
+Proto.prototype.request = function (method, args, noTimeout) {
+    var scrub = this.scrubber.scrub(args, noTimeout);
     
     this.emit('request', {
         method : method,
@@ -58,19 +58,23 @@ Proto.prototype.request = function (method, args) {
 Proto.prototype.handle = function (req) {
     var self = this;
     var args = self.scrubber.unscrub(req, function (id) {
-        if (self.callbacks.remote[id] === undefined) {
+        if (self.callbacks.find(id) === undefined) {
             // create a new function only if one hasn't already been created
             // for a particular id
             var cb = function () {
                 self.request(id, [].slice.apply(arguments));
             };
-            self.callbacks.remote[id] = self.wrap ? self.wrap(cb, id) : cb;
+            cb.toString = function() {
+                if(!this._id) {
+                    this._id = shortId.generate()
+                }
+
+                return this._id
+            }
+            self.callbacks.add(cb);
             return cb;
         }
-        return self.unwrap
-            ? self.unwrap(self.callbacks.remote[id], id)
-            : self.callbacks.remote[id]
-        ;
+        return self.callbacks.find(id);
     });
     
     if (req.method === 'methods') {

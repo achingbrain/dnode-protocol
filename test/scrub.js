@@ -1,8 +1,9 @@
 var test = require('tape');
 var scrubber = require('../lib/scrub');
+var callbacks = require('../lib/callbacks')
 
 test('no functions', function (t) {
-    var s = scrubber([]);
+    var s = scrubber(callbacks());
     t.deepEqual(
         s.scrub([ 1, 2, 3 ]),
         {
@@ -24,7 +25,7 @@ test('no functions', function (t) {
 });
 
 test('functions', function (t) {
-    var s = scrubber([]);
+    var s = scrubber(callbacks());
     
     var calls = { f : 0, g : 0 };
     var f = function () { calls.f ++ };
@@ -41,17 +42,17 @@ test('functions', function (t) {
         links : []
     });
     
-    s.callbacks[ids[0]]();
+    s.find(ids[0])();
     t.deepEqual(calls, { f : 1, g : 0 });
     
-    s.callbacks[ids[1]]();
+    s.find(ids[1])();
     t.deepEqual(calls, { f : 1, g : 1 });
     
     t.end();
 });
 
 test('link', function (t) {
-    var s = scrubber([]);
+    var s = scrubber(callbacks());
     var x = [ [ 0, { a : 1, b : 2, c : 3 }, 4 ], 5, 6 ];
     x[0][1].d = x[0][1];
     var sc = s.scrub(x);
@@ -67,7 +68,7 @@ test('link', function (t) {
 });
 
 test('multilink', function (t) {
-    var s = scrubber([]);
+    var s = scrubber(callbacks());
     var x = [ [ 0, { a : 1, b : 2, c : 3 }, 4 ], 5, 6 ];
     x[0][1].d = x[0][1];
     x.push(x);
@@ -88,7 +89,7 @@ test('multilink', function (t) {
 });
 
 test('enum set link', function (t) {
-    var s = scrubber([]);
+    var s = scrubber(callbacks());
     var req = {
         method : 0,
         arguments : [ 33, '[Function]' ],
@@ -107,7 +108,7 @@ test('enum set link', function (t) {
 });
 
 test('enum get link', function (t) {
-    var s = scrubber([]);
+    var s = scrubber(callbacks());
     var req = {
         method : 0,
         arguments : [ 'doom', '[Function]' ],
@@ -127,7 +128,7 @@ test('enum get link', function (t) {
 });
 
 test('skip set', function (t) {
-    var s = scrubber([]);
+    var s = scrubber(callbacks());
     var req = {
         method : 0,
         arguments : [ { x : 33 }, '[Function]' ],

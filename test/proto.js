@@ -45,8 +45,7 @@ test('proto hashes', function (t) {
         callbacks : {},
         links : []
     } ]);
-    
-    var pending = 2;
+
     c.request('x', [
         function (x, y , z) {
             t.deepEqual([ x, y, z ], [ 7, 8, 9 ]);
