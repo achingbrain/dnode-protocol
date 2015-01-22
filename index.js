@@ -64,14 +64,7 @@ Proto.prototype.handle = function (req) {
             var cb = function () {
                 self.request(id, [].slice.apply(arguments));
             };
-            cb.toString = function() {
-                if(!this._id) {
-                    this._id = shortId.generate()
-                }
-
-                return this._id
-            }
-            self.callbacks.add(cb);
+            self.callbacks.add(cb, req.method === 'methods');
             return cb;
         }
         return self.callbacks.find(id);
