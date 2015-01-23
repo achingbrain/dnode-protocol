@@ -2,7 +2,7 @@
     "name": "boss-dnode-protocol",
     "description": "implements the dnode protocol abstractly",
     "version": "0.2.2",
-    "repository": "https://github.com/substack/dnode-protocol.git",
+    "repository": "https://github.com/achingbrain/dnode-protocol.git",
     "author": {
         "name" : "James Halliday",
         "email" : "mail@substack.net",
