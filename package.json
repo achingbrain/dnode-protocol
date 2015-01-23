@@ -17,6 +17,7 @@
     "devDependencies": {
         "argg" : "~0.0.1",
         "istanbul" : "~0.3.0",
+        "pre-commit" : "^0.0",
         "tape" : "~3.4.0"
     },
     "scripts": {
